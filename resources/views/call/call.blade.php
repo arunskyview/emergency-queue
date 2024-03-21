@@ -232,7 +232,7 @@
         counters: JSON.parse('{!!$counters->toJson()!!}'),
         selectedCounter: "{{session()->has('counter')}}" ? JSON.parse('{!!session()->get("counter")!!}') : null,
         selectedService: {!! session()->has('service') ? json_encode(session()->get('service')) : 'null' !!},
-        selectedMultiService: {!! session()->has('selected_service') ? json_encode(session()->get('selected_service')) : 'null' !!},
+        selectedMultiService: {!! session()->has('selected_service') ? json_encode(session()->get('selected_service')): json_encode([0]) !!},
         service_data: {!! session()->has('service_data') ? json_encode(session()->get('service_data')) : 'null' !!},
 
         get_tokens_from_file: "{{ asset('storage/tokens_for_callpage.json') }}",

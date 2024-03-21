@@ -93,13 +93,17 @@ class CallController extends Controller
             $service_data[$value->id]=$value->name;
         }
         // dd($service_data);
-        $selected_service=$request->all_selected_service;
+        if(count($request->all_selected_service)>0){
+            $selected_service=$request->all_selected_service;
+        }else{
+            $selected_service=[];
+        }
         // session(['selected_service'=>$selected_service, 'service' => $service, 'counter' => $counter]);
         session(['selected_service'=>json_encode($selected_service),'service' => $selected_service,'service_data'=>json_encode($service_data), 'counter' => $counter]);
         $tokens_for_call = [];
         $called_tokens = [];
         // $tokens_for_call = $this->tokenRepository->getTokensForCall($service);
-        $tokens_for_call = $this->tokenRepository->getTokensForCall($request->all_selected_service);
+        $tokens_for_call = $this->tokenRepository->getTokensForCall($selected_service);
         // $called_tokens = $this->tokenRepository->getCalledTokens($service, $counter);
         $called_tokens = $this->tokenRepository->getCalledTokens($selected_service, $counter);
         // return  response()->json(['service' => $service, 'counter' => $counter, 'tokens_for_call' => $tokens_for_call, 'called_tokens' => $called_tokens]);
