@@ -19,6 +19,7 @@ class CreateLanguagesTable extends Migration
             $table->string('name');
             $table->string('display');
             $table->string('image');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

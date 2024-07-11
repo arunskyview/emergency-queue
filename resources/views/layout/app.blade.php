@@ -55,7 +55,7 @@
                         @if( Auth::user()->can('view issue token') || Auth::user()->can('view display'))
                         <li class="navbar-list left"><a class="waves-effect waves-block waves-light profile-button" href="javascript:void(0);" data-target="extra-dropdown"><i class="material-icons">attachment</i></a></li>
                         @endif
-                        <li class="navbar-list left"><a href="{{route('profile')}}"><b>{{session()->get("settings")->name}},{{session()->get("settings")->location}}</b></a></li>
+                        {{-- <li class="navbar-list left"><a href="{{route('profile')}}"><b>{{session()->get("settings")->name}},{{session()->get("settings")->location}}</b></a></li> --}}
 
                         <!-- <li><a class="waves-effect waves-block waves-light profile-button" href="javascript:void(0);" data-target="profile-dropdown"><span class="avatar-status "><img src="{{Auth::user()->image_url}}" alt="avatar"></span></a></li> -->
 
@@ -73,13 +73,13 @@
 
                     <ul class="dropdown-content" id="translation-dropdown">
             <li class="dropdown-item" onclick="changeLanguage(1)" ontouchstart="changeLanguage(1)"><a class="grey-text text-darken-1" href="#!" data-language="en"><i class="flag-icon flag-icon-gb"></i> English</a></li>
-            <li class="dropdown-item" onclick="changeLanguage(2)" ontouchstart="changeLanguage(2)"><a class="grey-text text-darken-1" href="#!" data-language="fr"><i class="flag-icon flag-icon-fr"></i> French</a></li>
-            <li class="dropdown-item" onclick="changeLanguage(3)" ontouchstart="changeLanguage(3)"><a class="grey-text text-darken-1" href="#!" data-language="in"><i class="flag-icon flag-icon-in"></i> Hindi</a></li>
+            {{-- <li class="dropdown-item" onclick="changeLanguage(2)" ontouchstart="changeLanguage(2)"><a class="grey-text text-darken-1" href="#!" data-language="fr"><i class="flag-icon flag-icon-fr"></i> French</a></li> --}}
+            {{-- <li class="dropdown-item" onclick="changeLanguage(3)" ontouchstart="changeLanguage(3)"><a class="grey-text text-darken-1" href="#!" data-language="in"><i class="flag-icon flag-icon-in"></i> Hindi</a></li> --}}
             <li class="dropdown-item" onclick="changeLanguage(4)" ontouchstart="changeLanguage(4)"><a class="grey-text text-darken-1" href="#!" data-language="sa"><i class="flag-icon flag-icon-sa"></i> Arabic</a></li>
-            <li class="dropdown-item" onclick="changeLanguage(5)" ontouchstart="changeLanguage(5)"><a class="grey-text text-darken-1" href="#!" data-language="sa"><i class="flag-icon flag-icon-es"></i> Spanish</a></li>
-            <li class="dropdown-item" onclick="changeLanguage(6)" ontouchstart="changeLanguage(6)"><a class="grey-text text-darken-1" href="#!" data-language="sa"><i class="flag-icon flag-icon-pt"></i> Portuguese</a></li>
-            <li class="dropdown-item" onclick="changeLanguage(7)" ontouchstart="changeLanguage(7)"><a class="grey-text text-darken-1" href="#!" data-language="sa"><i class="flag-icon flag-icon-it"></i> Italian</a></li>
-            <li class="dropdown-item" onclick="changeLanguage(8)" ontouchstart="changeLanguage(8)"><a class="grey-text text-darken-1" href="#!" data-language="sa"><i class="flag-icon flag-icon-id"></i> Indonesian</a></li>
+            {{-- <li class="dropdown-item" onclick="changeLanguage(5)" ontouchstart="changeLanguage(5)"><a class="grey-text text-darken-1" href="#!" data-language="sa"><i class="flag-icon flag-icon-es"></i> Spanish</a></li> --}}
+            {{-- <li class="dropdown-item" onclick="changeLanguage(6)" ontouchstart="changeLanguage(6)"><a class="grey-text text-darken-1" href="#!" data-language="sa"><i class="flag-icon flag-icon-pt"></i> Portuguese</a></li> --}}
+            {{-- <li class="dropdown-item" onclick="changeLanguage(7)" ontouchstart="changeLanguage(7)"><a class="grey-text text-darken-1" href="#!" data-language="sa"><i class="flag-icon flag-icon-it"></i> Italian</a></li> --}}
+            {{-- <li class="dropdown-item" onclick="changeLanguage(8)" ontouchstart="changeLanguage(8)"><a class="grey-text text-darken-1" href="#!" data-language="sa"><i class="flag-icon flag-icon-id"></i> Indonesian</a></li> --}}
           </ul>
 
                     <ul class="dropdown-content" id="profile-dropdown">

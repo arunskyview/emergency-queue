@@ -40,15 +40,30 @@ if (document.getElementById("call-page")) {
                 ],
                 category_id: null,
                 status_id: null,
-                category_time:0
+                category_time:0,
+                category_color:''
             }
         },
         methods: {
-            setCategoryTime(){
+            setCategoryTime(category_button){
                 // console.log()
                 for (const duration in this.categories) {
                     if (this.categories.hasOwnProperty(duration)) {
-                      if (this.categories[duration] === this.category_id) {
+                    //   if (this.categories[duration] === this.category_id) {
+                        if (this.categories[duration] === category_button) {
+                            this.category_id=category_button;
+                            if(category_button=='CAT 3')
+                            {
+                                this.category_color='#ff0000';
+                            }
+                            if(category_button=='CAT 4')
+                            {
+                                this.category_color='#ff8100fa';
+                            }
+                            if(category_button=='CAT 5')
+                            {
+                                this.category_color='#fff705fa';
+                            }
                         this.category_time=duration;
                         Swal.fire({
                             showConfirmButton: false,
@@ -59,6 +74,10 @@ if (document.getElementById("call-page")) {
                       }
                     }
                   }
+            },
+            setStatus(status_button)
+            {
+                this.status_id=status_button;
             },
             setService() {
                 this.closeSetServiceModal();
@@ -122,10 +141,39 @@ if (document.getElementById("call-page")) {
             closeSetServiceModal() {
                 $('#select-service').modal('close');
             },
-            openCategoryModal() {
+            openCategoryModal(id) {
                 $('.modal').modal({
                     dismissible: false
                 });
+                const data = {
+                    token_id: id,
+                }
+                this.enableLoader();
+                axios.post(window.JLToken.get_token_category_status_url, data).then(res => {
+                    this.category_id=res.data.category;
+                    this.disableLoader();
+                    if(res.data.category=='CAT 3')
+                    {
+                        this.category_time=30;
+                        this.category_color='#ff0000';
+                    }
+                    if(res.data.category=='CAT 4')
+                    {
+                        this.category_time=60;
+                        this.category_color='#ff8100fa';
+                    }
+                    if(res.data.category=='CAT 5')
+                    {
+                        this.category_time=120;
+                        this.category_color='#fff705fa';
+                    }
+                    this.status_id=res.data.status;
+                }).catch(err => {
+                    this.isCalled = false;
+                    this.openCategoryClicked= true;
+                    this.disableLoader();
+                    M.toast({ html: window?.JLToken?.error_lang, classes: "toast-error" });
+                })
                 $('#select-category').modal('open');
             },
             closeCategoryModal() {
@@ -133,7 +181,6 @@ if (document.getElementById("call-page")) {
             },
             setCategory(id)
             {
-
                 this.isCalled= false;
                 this.openCategoryClicked= false;
                 this.enableLoader();
@@ -143,32 +190,57 @@ if (document.getElementById("call-page")) {
                     status:this.status_id,
                     category_time:this.category_time
                 }
-                axios.post(window.JLToken.change_category_url, data).then(res => {
-                    if (res.data && res.data.status_code && res.data.status_code == 500) {
+console.log('tt'+this.category_time);
+                if(this.category_id==null)
+                {
+                    M.toast({ html: 'Please select category.', classes: "toast-error"});
+                    this.disableLoader();
+                    this.isCalled = false;
+                    this.openCategoryClicked= false;
+                }
+                else if(this.status_id ==null)
+                {
+                    M.toast({ html: 'Please select  status.', classes: "toast-error"});
+                    this.disableLoader();
+                    this.isCalled = false;
+                    this.openCategoryClicked= false;
+                }else if(this.category_time =='')
+                {
+                    M.toast({ html: 'Please select category for duration.', classes: "toast-error"});
+                    this.disableLoader();
+                    this.isCalled = false;
+                    this.openCategoryClicked= false;
+                }
+                else{
+                    this.enableLoader();
+                    axios.post(window.JLToken.change_category_url, data).then(res => {
+                        if (res.data && res.data.status_code && res.data.status_code == 500) {
+                            this.openCategoryClicked= true;
+                            this.disableLoader();
+                            this.closeCategoryModal();
+                            M.toast({ html: window?.JLToken?.error_lang, classes: "toast-error" });
+                        }
+                        else if (res.data && res.data.already_executed && res.data.already_executed == true) {
+                            this.disableLoader();
+                            M.toast({ html: window?.JLToken?.alredy_used_lang, classes: "toast-error" });
+                        } else {
+                            this.called_tokens = this.called_tokens.filter(element => element.id != id);
+                            this.token = res.data;
+                            this.isCalled = false;
+                            this.openCategoryClicked= false;
+                            this.called_tokens.unshift(res.data);
+                            this.disableLoader();
+                            $('#select-category').modal('close');
+                            M.toast({ html: 'Category set' });
+                        }
+                    }).catch(err => {
+                        this.isCalled = false;
                         this.openCategoryClicked= true;
                         this.disableLoader();
-                        this.closeCategoryModal();
                         M.toast({ html: window?.JLToken?.error_lang, classes: "toast-error" });
-                    }
-                    else if (res.data && res.data.already_executed && res.data.already_executed == true) {
-                        this.disableLoader();
-                        M.toast({ html: window?.JLToken?.alredy_used_lang, classes: "toast-error" });
-                    } else {
-                        this.called_tokens = this.called_tokens.filter(element => element.id != id);
-                        this.token = res.data;
-                        this.isCalled = false;
-                        this.openCategoryClicked= false;
-                        this.called_tokens.unshift(res.data);
-                        this.disableLoader();
-                        $('#select-category').modal('close');
-                        M.toast({ html: 'Category set' });
-                    }
-                }).catch(err => {
-                    this.isCalled = false;
-                    this.openCategoryClicked= true;
-                    this.disableLoader();
-                    M.toast({ html: window?.JLToken?.error_lang, classes: "toast-error" });
-                })
+                    })
+                }
+
             },
             getTokenForCall() {
 

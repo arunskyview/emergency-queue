@@ -20,7 +20,8 @@
                 <div class="col m8">
                     <div class="card-panel center-align" style="margin-bottom:0;height:85vh;display:flex;flex-direction: column-reverse;justify-content: flex-end;">
                         <div>
-                            <div  :style="{'background-color':tokens1[0]?.service.color,'font-size':'50px','color':'black', 'margin':'0px'}">@{{tokens1[0]?.service.name}}</div>
+                            {{-- <div  :style="{'background-color':tokens1[0]?.service.color,'font-size':'50px','color':'black', 'margin':'0px'}">@{{tokens1[0]?.service.name}}</div> --}}
+                            <div  :style="{'background-color':token_label_1?.color,'font-size':'50px','color':'black', 'margin':'0px'}">@{{token_label_1?.name}}</div>
                             <div class="bolder-color" style="font-size:25px; margin:0px">{{__('messages.display.token number')}}</div>
                             <span v-if="tokens1[0]" style="font-size:130px;color:black;font-weight:bold;line-height:1.2">@{{tokens1[0]?.token_letter}}-@{{tokens1[0]?.token_number}}</span>
                             <span v-if="!tokens1[0]" style="font-size:130px;color:black;font-weight:bold;line-height:1.2">{{__('messages.display.nil')}}</span>
@@ -56,7 +57,8 @@
                 <div class="col m8">
                     <div class="card-panel center-align" style="margin-bottom:0;height:85vh;display:flex;flex-direction: column-reverse;justify-content: flex-end;">
                         <div>
-                            <div  :style="{'background-color':tokens2[0]?.service.color,'font-size':'50px','color':'black', 'margin':'0px'}">@{{tokens2[0]?.service.name}}</div>
+                            {{-- <div  :style="{'background-color':tokens2[0]?.service.color,'font-size':'50px','color':'black', 'margin':'0px'}">@{{tokens2[0]?.service.name}}</div> --}}
+                            <div  :style="{'background-color':token_label_2?.color,'font-size':'50px','color':'black', 'margin':'0px'}">@{{token_label_2?.name}}</div>
                             <div class="bolder-color" style="font-size:25px; margin:0px">{{__('messages.display.token number')}}</div>
                             <span v-if="tokens2[0]" style="font-size:130px;color:black;font-weight:bold;line-height:1.2">@{{tokens2[0]?.token_letter}}-@{{tokens2[0]?.token_number}}</span>
                             <span v-if="!tokens2[0]" style="font-size:130px;color:black;font-weight:bold;line-height:1.2">{{__('messages.display.nil')}}</span>
@@ -99,7 +101,8 @@
                 <div class="col m8">
                     <div class="card-panel center-align" style="margin-bottom:0;height:85vh;display:flex;flex-direction: column-reverse;justify-content: flex-end;">
                         <div>
-                            <div  :style="{'background-color':tokens3[0]?.service.color,'font-size':'50px','color':'black', 'margin':'0px'}">@{{tokens3[0]?.service.name}}</div>
+                            {{-- <div  :style="{'background-color':tokens3[0]?.service.color,'font-size':'50px','color':'black', 'margin':'0px'}">@{{tokens3[0]?.service.name}}</div> --}}
+                            <div  :style="{'background-color':token_label_3?.color,'font-size':'50px','color':'black', 'margin':'0px'}">@{{token_label_3?.name}}</div>
                             <div class="bolder-color" style="font-size:25px; margin:0px">{{__('messages.display.token number')}}</div>
                             <span v-if="tokens3[0]" style="font-size:130px;color:black;font-weight:bold;line-height:1.2">@{{tokens3[0]?.token_letter}}-@{{tokens3[0]?.token_number}}</span>
                             <span v-if="!tokens3[0]" style="font-size:130px;color:black;font-weight:bold;line-height:1.2">{{__('messages.display.nil')}}</span>
@@ -158,6 +161,9 @@
         selectedService1:"{{$service_1}}",
         selectedService2:"{{$service_2}}",
         selectedService3:"{{$service_3}}",
+        selectedServiceLabel1:JSON.parse('{!!$service_label_1->toJson()!!}'),
+        selectedServiceLabel2:JSON.parse('{!!$service_label_2->toJson()!!}'),
+        selectedServiceLabel3:JSON.parse('{!!$service_label_3->toJson()!!}'),
         get_server_timer:"{{route('get-server-time')}}",
         get_tokens_from_file1: "{{ asset('storage/tokens_for_callpage.json') }}",
         get_initial_tokens: "{{ route('get-tokens-for-display') }}",

@@ -57,7 +57,7 @@ class UserRepository
             Storage::disk('public')->delete($user->image);
         }
     }
-   
+
     public function updatePassword($data,$user)
     {
         $user->password = Hash::make($data['newpassword']);

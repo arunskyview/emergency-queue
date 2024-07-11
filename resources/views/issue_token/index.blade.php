@@ -359,10 +359,10 @@ button {
                     }
                     //<p style="font-size: 10px; margin-top:-12px;">{{__('messages.issue_token.please wait for your turn')}}</p>
                     //<p style="font-size: 10px; margin-top:-12px;">{{__('messages.issue_token.customer waiting')}}:` + response.customer_waiting + `</p>
+                    // <p style="font-size: 20px; font-weight: bold; margin-top:-15px;">` + response.settings.name + `,` + response.settings.location + ` </p>
                     let html = `
                             <p style="margin-top:-15px;"><img src="{{session()->get('settings')->logo_url}}" style="width:270px;"></p>
-                            <p style="font-size: 20px; font-weight: bold; margin-top:-15px;">` + response.settings.name + `,` + response.settings.location + `
-                            </p>
+
                             <p style="font-size: 15px; margin-top:-15px;">` + response.queue.service.name + `</p>
                             `+ar_service+`
                             <h3 style="font-size: 25px; margin-bottom: 5px; font-weight: bold; margin-top:-12px; margin-bottom:16px;">` + response.queue.letter + ` - ` + response.queue.number + `</h3>
@@ -438,6 +438,37 @@ button {
         var loaderGif='<div id="mrnpageLoader" style="text-align:center;"><img src="{{ asset('storage/page_loader.gif')}}"></div>';
         var mrn_no=$('#name').val();
         $('#mrn_loader').html(loaderGif);
+
+        if(mrn_no=='0123456789')
+        {
+
+            $('#mrn_loader').html('');
+            $('#mrn_data').attr('style','display:block;text-align:left;');
+
+            $('#valid_mrn').attr('style','display:block;text-align:left;');
+            $('#invalid_mrn').attr('style','display:none');
+
+            $('#modal_button').removeClass('disabled');
+
+            $('#mrn_name').html('Test Dev User');
+            $('#mrn_gender').html('Male');
+            $('#mrn_national_id').html('112233445566');
+            $('#mrn_age').html('30');
+
+            $('#first_name_en').val('Test');
+            $('#middle_name_en').val('Dev');
+            $('#last_name_en').val('User');
+            $('#first_name_ar').val('Test');
+            $('#middle_name_ar').val('Dev');
+            $('#last_name_ar').val('User');
+            $('#gender').val('Male');
+            $('#national_id').val('112233445566');
+            $('#dob').val('1994-01-01');
+            $('#mobile_no').val('966566254125');
+            $('#mrn_no').val('0123456789');
+            return;
+        }
+
         $.ajax({
             type:'POST',
             url:'{{route('check-patient-mrn')}}',

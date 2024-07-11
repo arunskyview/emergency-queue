@@ -37,7 +37,7 @@ class TokenRepository
             'called' => false,
             'reference_no' => Str::random(9),
             'letter' => $service->letter,
-            'name' => ($is_details && $service->ask_name == 1) ? $data['name'] : null,
+            'name' => ($is_details && $service->ask_name == 1) ? $data['mrn_no'] : null,
             'email' => ($is_details && $service->ask_email == 1) ? $data['email'] : null,
             'phone' => ($is_details && $service->ask_phone == 1) ? $data['phone'] : null,
             'position' => $this->customerWaiting($service) + 1,
@@ -61,8 +61,8 @@ class TokenRepository
 
         //get selected service token
         $tokens = Queue::where('created_at', '>=', Carbon::now()->startOfDay())->where('created_at', '<=', Carbon::now())
-            ->where('called', false)->whereIn('service_id', $service)->orderBy('id','DESC')->get()->toArray();
-            
+            ->where('called', false)->whereIn('service_id', $service)->orderBy('id','asc')->get()->toArray();
+
         // $tokens = Queue::where('created_at', '>=', Carbon::now()->startOfDay())->where('created_at', '<=', Carbon::now())
         //     ->where('called', false)->orderBy('priority','ASC')->orderBy('id','ASC')->get()->toArray();
         return $tokens;
@@ -82,7 +82,7 @@ class TokenRepository
         // $tokens_for_call = Queue::where('created_at', '>=', Carbon::now()->startOfDay())->where('created_at', '<=', Carbon::now())
         //     ->where('called', false)->orderBy('priority','ASC')->orderBy('id','ASC')->get()->toArray();
         $tokens_for_call = Queue::where('created_at', '>=', Carbon::now()->startOfDay())->where('created_at', '<=', Carbon::now())
-            ->where('called', false)->get()->toArray();
+            ->where('called', false)->orderBy('id','ASC')->get()->toArray();
         $called_tokens =  Call::with('service')->where('created_at', '>=', Carbon::now()->startOfDay())->where('created_at', '<=', Carbon::now())
             ->orderByDesc('created_at')->get()->toArray();
 
@@ -97,24 +97,42 @@ class TokenRepository
     }
     public function saveMrnDetail($data)
     {
-        $check_mrn=MrnDetail::where('mrn_no',$data['mrn_no'])->first();
-        if(!$check_mrn)
+        if(isset($data['mrn_no']))
         {
-            $addMrnDetail=new MrnDetail;
-            $addMrnDetail->mrn_no=$data['mrn_no'];
-            $addMrnDetail->first_name_en=$data['first_name_en'];
-            $addMrnDetail->middle_name_en=$data['middle_name_en'];
-            $addMrnDetail->last_name_en=$data['last_name_en'];
-            $addMrnDetail->first_name_ar=$data['first_name_ar'];
-            $addMrnDetail->middle_name_ar=$data['middle_name_ar'];
-            $addMrnDetail->last_name_ar=$data['last_name_ar'];
-            $addMrnDetail->gender=$data['gender'];
-            $addMrnDetail->national_id=$data['national_id'];
-            $addMrnDetail->dob=$data['dob'];
-            $addMrnDetail->mobile_no=$data['mobile_no'];
-            $addMrnDetail->save();
-            return $addMrnDetail;
-        }
+            $check_mrn=MrnDetail::where('mrn_no',$data['mrn_no'])->first();
+            if(!$check_mrn)
+            {
+                $mrn_length=strlen($data['mrn_no']);
+                if($mrn_length<7)
+                {
+                    $add_zero=7-$mrn_length;
+                    $no_of_zeros = $add_zero;
+                    $number = $data['mrn_no'];
+                    for($i=1;$i<=$no_of_zeros;$i++)
+                    {
+                      $number = '0'.$number;
+                    }
+                    $new_mrn=$number;
+                }
+                else{
+                    $new_mrn=$data['mrn_no'];
+                }
 
+                $addMrnDetail=new MrnDetail;
+                $addMrnDetail->mrn_no=$new_mrn;
+                $addMrnDetail->first_name_en=$data['first_name_en'];
+                $addMrnDetail->middle_name_en=$data['middle_name_en'];
+                $addMrnDetail->last_name_en=$data['last_name_en'];
+                $addMrnDetail->first_name_ar=$data['first_name_ar'];
+                $addMrnDetail->middle_name_ar=$data['middle_name_ar'];
+                $addMrnDetail->last_name_ar=$data['last_name_ar'];
+                $addMrnDetail->gender=$data['gender'];
+                $addMrnDetail->national_id=$data['national_id'];
+                $addMrnDetail->dob=$data['dob'];
+                $addMrnDetail->mobile_no=$data['mobile_no'];
+                $addMrnDetail->save();
+                return $addMrnDetail;
+            }
+        }
     }
 }

@@ -304,6 +304,7 @@ class CallController extends Controller
     }
     public function serverTime(Request $request)
     {
+        // dd($request);
         $data=[];
         $current_date=date('Y-m-d H:i:s');
         $ended_at=$request->ended_at;
@@ -331,5 +332,34 @@ class CallController extends Controller
         return $data;
         // return $total_mins.':'.$second;
         //echo $total_mins.':'.$second;
+    }
+    public function tokenTime(Request $request)
+    {
+        // dd($request);
+        $data=[];
+        $current_date=date('Y-m-d H:i:s');
+        $ended_at=$request->created_at;
+        $datetime1 = date_create($current_date);
+        $datetime2 = date_create($ended_at);
+        $interval = date_diff($datetime1, $datetime2);
+        $time_diff=$interval->format('%h hours %i minutes %s seconds');
+
+        $hour=$interval->format('%h');
+        $minutes=$interval->format('%i');
+        $second=$interval->format('%S');
+        $total_mins=$hour*60 + $minutes;
+
+        $with_second=$total_mins.':'.$second;
+        $data['id']=$request->id;
+        $data['without_second']=$total_mins;
+        $data['with_second']=$with_second;
+        // return $total_mins;
+
+        return $data;
+    }
+    public function categoryStatus(Request $request)
+    {
+        $calledToken=Call::where('id',$request->token_id)->first();
+        return $calledToken;
     }
 }

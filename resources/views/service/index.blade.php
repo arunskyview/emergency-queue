@@ -69,7 +69,7 @@
 
                                                         <a class="btn-floating btn-action waves-effect waves-light red tooltipped frmsubmit" href="{{route('services.destroy',[$service->id])}}" data-position=top data-tooltip="{{__('messages.common.delete')}}" method="DELETE"><i class="material-icons">delete</i></a>
 
-                                                        <a class="btn-floating btn-action waves-effect waves-light green tooltipped" href="{{route('get_display_by_service',[\Crypt::encrypt($service->id)])}}" target="_blank" data-position=top data-tooltip="{{__('messages.display.display')}}"><i class="material-icons">desktop_windows</i></a>
+                                                        {{-- <a class="btn-floating btn-action waves-effect waves-light green tooltipped" href="{{route('get_display_by_service',[\Crypt::encrypt($service->id)])}}" target="_blank" data-position=top data-tooltip="{{__('messages.display.display')}}"><i class="material-icons">desktop_windows</i></a> --}}
 
                                                     </td>
                                                 </tr>

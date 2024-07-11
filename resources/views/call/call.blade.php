@@ -48,30 +48,35 @@
                                                         </button>
                                                     </div>
                                                     <div class="input-field col s6">
+                                                        <button class="btn waves-effect waves-light center call-bt submit " :style="[font_size_smaller  ? { 'font-size' : '14px', 'padding' : '0 4px' } : '']" @click="openCategoryModal(token.id)" type="button" style="min-width:165px;" :disabled="!isCalled || openCategoryClicked">{{__('messages.call_page.category')}}
+                                                            <i class="material-icons right" :style="[font_size_smaller ? { 'margin-left' : '0px' } : '']">list</i>
+                                                        </button>
+                                                    </div>
+                                                    {{-- <div class="input-field col s6">
                                                         <button class="btn waves-effect waves-light center submit call-bt" type="submit" @click="recallToken(token.id)" name="action" style="min-width:165px" :disabled="!isCalled || recallClicked">{{__('messages.call_page.recall')}}
                                                             <i class="material-icons right">send</i>
                                                         </button>
-                                                    </div>
+                                                    </div> --}}
                                                 </div>
                                                 <div class="col m6 offset-m3 col s12 center">
-                                                    <div class="input-field col s6">
+                                                    {{-- <div class="input-field col s6">
                                                         <button class="btn waves-effect waves-light center submit call-bt" type="submit" name="action" @click="noShowToken(token.id)" :disabled="!isCalled || noshowClicked" :style="[font_size_smaller  ? { 'font-size' : '14px', 'padding' : '0 4px' } : '']" style="min-width:165px;">{{__('messages.call_page.noshow')}}
                                                             <i class="material-icons right" :style="[font_size_smaller ? { 'margin-left' : '0px' } : '']">send</i>
                                                         </button>
-                                                    </div>
+                                                    </div> --}}
                                                     <div class="input-field col s6">
-                                                        <button class="btn waves-effect waves-light center call-bt submit " :style="[font_size_smaller  ? { 'font-size' : '14px', 'padding' : '0 4px' } : '']" @click="openCategoryModal(token.id)" type="button" style="min-width:165px;" :disabled="!isCalled || openCategoryClicked">{{__('messages.call_page.category')}}
+                                                        {{-- <button class="btn waves-effect waves-light center call-bt submit " :style="[font_size_smaller  ? { 'font-size' : '14px', 'padding' : '0 4px' } : '']" @click="openCategoryModal(token.id)" type="button" style="min-width:165px;" :disabled="!isCalled || openCategoryClicked">{{__('messages.call_page.category')}}
                                                             <i class="material-icons right" :style="[font_size_smaller ? { 'margin-left' : '0px' } : '']">send</i>
-                                                        </button>
+                                                        </button> --}}
                                                         {{-- <a class="btn waves-effect center call-bt waves-light tooltipped" @click="openCategoryModal(token.id)" :disabled="openCategoryClicked"  data-position="top" data-tooltip="Category">{{__('messages.call_page.category')}}<i class="material-icons right" :style="[font_size_smaller ? { 'margin-left' : '0px' } : '']">send</i></a> --}}
                                                     </div>
                                                 </div>
                                                 <div class="col m6 offset-m3 col s12 center">
-                                                    <div class="input-field col s6">
+                                                    {{-- <div class="input-field col s6">
                                                         <button class="btn waves-effect waves-light center call-bt submit" type="submit" @click="serveToken(token.id)" style="min-width:165px" :disabled="!isCalled || servedClicked">{{__('messages.call_page.served')}}
                                                             <i class="material-icons right">send</i>
                                                         </button>
-                                                    </div>
+                                                    </div> --}}
                                                 </div>
                                                 <div class="col s12 center-align mt-2 h1" v-if="selected_service && selected_counter">
                                                     {{-- <h2><b>{{__('messages.call_page.service')}}:</b> @{{ selected_service.name }}|</h2> --}}
@@ -161,29 +166,47 @@
                         <div class="divider col s12"></div>
                         <div class="row" style="padding-top: 7px;">
                             <div class="row">
+                                <div class="col-sm-6" style="margin-left:130px;">
+                                    <label>{{__('messages.call_page.category')}}</label>
+                                </div>
+                            </div>
+                            <div class="row">
                                 <div class="input-field col s10 offset-s1">
-                                    <div class="input-field col s6">
-                                        <select v-model="category_id" @change="setCategoryTime()">
-                                            <option value="" disabled selected>{{__('messages.call_page.choose your category')}}</option>
-                                            <option v-for="category in categories" :value="category">@{{category}}</option>
-                                        </select>
-                                        <label>{{__('messages.call_page.category')}}</label>
+                                    {{-- <select v-model="category_ids" @change="setCategoryTime()" style="display: none;">
+                                        <option value="" disabled selected>{{__('messages.call_page.choose your category')}}</option>
+                                        <option v-for="category in categories" :value="category">@{{category}}</option>
+                                    </select>
+                                    <label>{{__('messages.call_page.category')}}</label> --}}
+
+                                    <div class="input-field col s2" v-for="(category,index) in categories" :key="index">
+                                        <button :style="{'background-color':category_id === category ? category_color :''}" class="btn waves-effect waves-light" type="button" @click="setCategoryTime(category)" >@{{category}} </button><i class="material-icons" v-if="category_id == category">check</i>
                                     </div>
                                     <div class="input-field col s6">
-                                        <input type="number" v-model="category_time" name="category_time">
+                                        <input type="number" v-model="category_time" name="category_time" oninput="this.value = Math.abs(this.value)">
                                         <label>{{__('messages.call_page.time')}}</label>
                                     </div>
                                 </div>
                             </div>
                             <div class="row">
+                                <div class="col-sm-6" style="margin-left:130px;padding-bottom:10px;">
+                                    <label>{{__('messages.call_page.status')}}</label>
+                                </div>
+                            </div>
+                            <div class="row">
                                 <div class="col s10 offset-s1">
-                                    <div class="input-field col s12">
-                                        <select v-model="status_id">
+                                    <div class="col s3.5" v-for="stat in status" >
+                                        {{-- <select v-model="status_id">
                                             <option value="" disabled selected>{{__('messages.call_page.choose your status')}}</option>
                                             <option v-for="stat in status" :value="stat">@{{stat}}</option>
                                         </select>
-                                        <label>{{__('messages.call_page.status')}}</label>
+                                        <label>{{__('messages.call_page.status')}}</label> --}}
+
+                                        {{-- <button class="btn waves-effect waves-light" type="button" @click="setStatus(stat)"><span v-if="stat == 'RECALL'">Waiting Area</span><span v-if="stat != 'RECALL'">@{{stat}}</span></button> --}}
+                                        <button :style="{'background-color': stat === status_id ? 'brown' :''}" class="btn waves-effect waves-light" type="button" @click="setStatus(stat)"><span v-if="stat == 'RECALL'">WAITING AREA  </span><span v-if="stat != 'RECALL'">@{{stat}} </span></button><i class="material-icons" v-if="stat == status_id">check</i>
                                     </div>
+                                    {{-- <div class="input-field col s2" v-for="stat in status">
+                                        <button class="btn waves-effect waves-light" type="button" @click="setStatus(stat)"><span v-if="stat == 'RECALL'">Waiting Area</span><span v-if="stat != 'RECALL'">@{{stat}}</span></button>
+                                    </div> --}}
                                 </div>
                             </div>
                         </div>
@@ -215,6 +238,7 @@
     window.JLToken = {
         current_lang: '{{\App::currentLocale()}}',
         call_page_loaded: true,
+        get_token_category_status_url: "{{ route('get-token-category-and-status') }}",
         set_service_counter_url: "{{ route('set-service-and-counter') }}",
         get_token_for_call_url: "{{ route('get-token-for-call') }}",
         get_services_url: "{{ route('get-token-for-call') }}",

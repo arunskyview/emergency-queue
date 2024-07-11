@@ -19638,15 +19638,31 @@ if (document.getElementById("call-page")) {
         status: ['SEND TO DOCTOR', 'RECALL'],
         category_id: null,
         status_id: null,
-        category_time: 0
+        category_time: 0,
+        category_color: ''
       };
     },
     methods: {
-      setCategoryTime: function setCategoryTime() {
+      setCategoryTime: function setCategoryTime(category_button) {
         // console.log()
         for (var duration in this.categories) {
           if (this.categories.hasOwnProperty(duration)) {
-            if (this.categories[duration] === this.category_id) {
+            //   if (this.categories[duration] === this.category_id) {
+            if (this.categories[duration] === category_button) {
+              this.category_id = category_button;
+
+              if (category_button == 'CAT 3') {
+                this.category_color = '#ff0000';
+              }
+
+              if (category_button == 'CAT 4') {
+                this.category_color = '#ff8100fa';
+              }
+
+              if (category_button == 'CAT 5') {
+                this.category_color = '#fff705fa';
+              }
+
               this.category_time = duration;
               Swal.fire({
                 showConfirmButton: false,
@@ -19657,6 +19673,9 @@ if (document.getElementById("call-page")) {
             }
           }
         }
+      },
+      setStatus: function setStatus(status_button) {
+        this.status_id = status_button;
       },
       setService: function setService() {
         var _this = this;
@@ -19733,9 +19752,49 @@ if (document.getElementById("call-page")) {
       closeSetServiceModal: function closeSetServiceModal() {
         $('#select-service').modal('close');
       },
-      openCategoryModal: function openCategoryModal() {
+      openCategoryModal: function openCategoryModal(id) {
+        var _this2 = this;
+
         $('.modal').modal({
           dismissible: false
+        });
+        var data = {
+          token_id: id
+        };
+        this.enableLoader();
+        axios.post(window.JLToken.get_token_category_status_url, data).then(function (res) {
+          _this2.category_id = res.data.category;
+
+          _this2.disableLoader();
+
+          if (res.data.category == 'CAT 3') {
+            _this2.category_time = 30;
+            _this2.category_color = '#ff0000';
+          }
+
+          if (res.data.category == 'CAT 4') {
+            _this2.category_time = 60;
+            _this2.category_color = '#ff8100fa';
+          }
+
+          if (res.data.category == 'CAT 5') {
+            _this2.category_time = 120;
+            _this2.category_color = '#fff705fa';
+          }
+
+          _this2.status_id = res.data.status;
+        })["catch"](function (err) {
+          var _window3, _window3$JLToken;
+
+          _this2.isCalled = false;
+          _this2.openCategoryClicked = true;
+
+          _this2.disableLoader();
+
+          M.toast({
+            html: (_window3 = window) === null || _window3 === void 0 ? void 0 : (_window3$JLToken = _window3.JLToken) === null || _window3$JLToken === void 0 ? void 0 : _window3$JLToken.error_lang,
+            classes: "toast-error"
+          });
         });
         $('#select-category').modal('open');
       },
@@ -19743,7 +19802,7 @@ if (document.getElementById("call-page")) {
         $('#select-category').modal('close');
       },
       setCategory: function setCategory(id) {
-        var _this2 = this;
+        var _this3 = this;
 
         this.isCalled = false;
         this.openCategoryClicked = false;
@@ -19754,95 +19813,124 @@ if (document.getElementById("call-page")) {
           status: this.status_id,
           category_time: this.category_time
         };
-        axios.post(window.JLToken.change_category_url, data).then(function (res) {
-          if (res.data && res.data.status_code && res.data.status_code == 500) {
-            var _window3, _window3$JLToken;
+        console.log('tt' + this.category_time);
 
-            _this2.openCategoryClicked = true;
-
-            _this2.disableLoader();
-
-            _this2.closeCategoryModal();
-
-            M.toast({
-              html: (_window3 = window) === null || _window3 === void 0 ? void 0 : (_window3$JLToken = _window3.JLToken) === null || _window3$JLToken === void 0 ? void 0 : _window3$JLToken.error_lang,
-              classes: "toast-error"
-            });
-          } else if (res.data && res.data.already_executed && res.data.already_executed == true) {
-            var _window4, _window4$JLToken;
-
-            _this2.disableLoader();
-
-            M.toast({
-              html: (_window4 = window) === null || _window4 === void 0 ? void 0 : (_window4$JLToken = _window4.JLToken) === null || _window4$JLToken === void 0 ? void 0 : _window4$JLToken.alredy_used_lang,
-              classes: "toast-error"
-            });
-          } else {
-            _this2.called_tokens = _this2.called_tokens.filter(function (element) {
-              return element.id != id;
-            });
-            _this2.token = res.data;
-            _this2.isCalled = false;
-            _this2.openCategoryClicked = false;
-
-            _this2.called_tokens.unshift(res.data);
-
-            _this2.disableLoader();
-
-            $('#select-category').modal('close');
-            M.toast({
-              html: 'Category set'
-            });
-          }
-        })["catch"](function (err) {
-          var _window5, _window5$JLToken;
-
-          _this2.isCalled = false;
-          _this2.openCategoryClicked = true;
-
-          _this2.disableLoader();
-
+        if (this.category_id == null) {
           M.toast({
-            html: (_window5 = window) === null || _window5 === void 0 ? void 0 : (_window5$JLToken = _window5.JLToken) === null || _window5$JLToken === void 0 ? void 0 : _window5$JLToken.error_lang,
+            html: 'Please select category.',
             classes: "toast-error"
           });
-        });
+          this.disableLoader();
+          this.isCalled = false;
+          this.openCategoryClicked = false;
+        } else if (this.status_id == null) {
+          M.toast({
+            html: 'Please select  status.',
+            classes: "toast-error"
+          });
+          this.disableLoader();
+          this.isCalled = false;
+          this.openCategoryClicked = false;
+        } else if (this.category_time == '') {
+          M.toast({
+            html: 'Please select category for duration.',
+            classes: "toast-error"
+          });
+          this.disableLoader();
+          this.isCalled = false;
+          this.openCategoryClicked = false;
+        } else {
+          this.enableLoader();
+          axios.post(window.JLToken.change_category_url, data).then(function (res) {
+            if (res.data && res.data.status_code && res.data.status_code == 500) {
+              var _window4, _window4$JLToken;
+
+              _this3.openCategoryClicked = true;
+
+              _this3.disableLoader();
+
+              _this3.closeCategoryModal();
+
+              M.toast({
+                html: (_window4 = window) === null || _window4 === void 0 ? void 0 : (_window4$JLToken = _window4.JLToken) === null || _window4$JLToken === void 0 ? void 0 : _window4$JLToken.error_lang,
+                classes: "toast-error"
+              });
+            } else if (res.data && res.data.already_executed && res.data.already_executed == true) {
+              var _window5, _window5$JLToken;
+
+              _this3.disableLoader();
+
+              M.toast({
+                html: (_window5 = window) === null || _window5 === void 0 ? void 0 : (_window5$JLToken = _window5.JLToken) === null || _window5$JLToken === void 0 ? void 0 : _window5$JLToken.alredy_used_lang,
+                classes: "toast-error"
+              });
+            } else {
+              _this3.called_tokens = _this3.called_tokens.filter(function (element) {
+                return element.id != id;
+              });
+              _this3.token = res.data;
+              _this3.isCalled = false;
+              _this3.openCategoryClicked = false;
+
+              _this3.called_tokens.unshift(res.data);
+
+              _this3.disableLoader();
+
+              $('#select-category').modal('close');
+              M.toast({
+                html: 'Category set'
+              });
+            }
+          })["catch"](function (err) {
+            var _window6, _window6$JLToken;
+
+            _this3.isCalled = false;
+            _this3.openCategoryClicked = true;
+
+            _this3.disableLoader();
+
+            M.toast({
+              html: (_window6 = window) === null || _window6 === void 0 ? void 0 : (_window6$JLToken = _window6.JLToken) === null || _window6$JLToken === void 0 ? void 0 : _window6$JLToken.error_lang,
+              classes: "toast-error"
+            });
+          });
+        }
       },
       getTokenForCall: function getTokenForCall() {
-        var _this3 = this;
+        var _this4 = this;
 
         axios.get(window.JLToken.get_token_for_call_url).then(function (res) {
-          _this3.token = null;
-          _this3.tokens_for_next_to_call = res.data.tokens_for_call;
-          _this3.called_tokens = res.data.called_tokens;
+          _this4.token = null;
+          _this4.tokens_for_next_to_call = res.data.tokens_for_call;
+          _this4.called_tokens = res.data.called_tokens;
 
-          if (_this3.called_tokens.length && _this3.called_tokens[0] && _this3.called_tokens[0].ended_at == null) {
-            _this3.token = _this3.called_tokens[0];
+          if (_this4.called_tokens.length && _this4.called_tokens[0] && _this4.called_tokens[0].ended_at == null) {
+            _this4.token = _this4.called_tokens[0];
 
-            _this3.setDataForTimer(_this3.token);
+            _this4.setDataForTimer(_this4.token);
 
-            _this3.isCalled = true;
-          } else if (_this3.called_tokens && _this3.called_tokens.length && _this3.called_tokens[0]) {
-            _this3.token = _this3.called_tokens[0];
-            _this3.isCalled = false;
+            _this4.isCalled = true;
+          } else if (_this4.called_tokens && _this4.called_tokens.length && _this4.called_tokens[0]) {
+            _this4.token = _this4.called_tokens[0];
+            _this4.isCalled = false;
           } else {
-            _this3.isCalled = false;
+            _this4.isCalled = false;
           }
 
-          _this3.disableLoader();
+          _this4.disableLoader();
         })["catch"](function (err) {
-          var _window6, _window6$JLToken;
+          var _window7, _window7$JLToken;
 
-          _this3.disableLoader();
+          _this4.disableLoader();
 
           M.toast({
-            html: (_window6 = window) === null || _window6 === void 0 ? void 0 : (_window6$JLToken = _window6.JLToken) === null || _window6$JLToken === void 0 ? void 0 : _window6$JLToken.error_lang,
+            html: (_window7 = window) === null || _window7 === void 0 ? void 0 : (_window7$JLToken = _window7.JLToken) === null || _window7$JLToken === void 0 ? void 0 : _window7$JLToken.error_lang,
             classes: "toast-error"
           });
         });
       },
       callNext: function callNext(id) {
-        var _this4 = this;
+        var _this5 = this;
 
         // console.log('aa'+id);
         this.enableLoader();
@@ -19857,70 +19945,70 @@ if (document.getElementById("call-page")) {
         axios.post(window.JLToken.call_next_url, data).then(function (res) {
           if (res.data) {
             if (res.data.no_token_found && res.data.no_token_found == true) {
-              var _window7, _window7$JLToken;
+              var _window8, _window8$JLToken;
 
-              _this4.disableLoader();
+              _this5.disableLoader();
 
               M.toast({
-                html: (_window7 = window) === null || _window7 === void 0 ? void 0 : (_window7$JLToken = _window7.JLToken) === null || _window7$JLToken === void 0 ? void 0 : _window7$JLToken.no_ticket_lang,
+                html: (_window8 = window) === null || _window8 === void 0 ? void 0 : (_window8$JLToken = _window8.JLToken) === null || _window8$JLToken === void 0 ? void 0 : _window8$JLToken.no_ticket_lang,
                 timeRemaining: 20
               });
             } else if (res.data && res.data.status_code && res.data.status_code == 500) {
-              var _window8, _window8$JLToken;
+              var _window9, _window9$JLToken;
 
-              _this4.isCalled = false;
-              _this4.callNextClicked = false;
-              _this4.openCategoryClicked = false;
+              _this5.isCalled = false;
+              _this5.callNextClicked = false;
+              _this5.openCategoryClicked = false;
 
-              _this4.disableLoader();
+              _this5.disableLoader();
 
               M.toast({
-                html: (_window8 = window) === null || _window8 === void 0 ? void 0 : (_window8$JLToken = _window8.JLToken) === null || _window8$JLToken === void 0 ? void 0 : _window8$JLToken.error_lang,
+                html: (_window9 = window) === null || _window9 === void 0 ? void 0 : (_window9$JLToken = _window9.JLToken) === null || _window9$JLToken === void 0 ? void 0 : _window9$JLToken.error_lang,
                 classes: "toast-error"
               });
             } else {
-              var _window9, _window9$JLToken;
+              var _window10, _window10$JLToken;
 
-              _this4.tokens_for_next_to_call = _this4.tokens_for_next_to_call.filter(function (element) {
-                return element.id != _this4.tokens_for_next_to_call[0].id;
+              _this5.tokens_for_next_to_call = _this5.tokens_for_next_to_call.filter(function (element) {
+                return element.id != _this5.tokens_for_next_to_call[0].id;
               });
 
-              _this4.called_tokens.unshift(res.data);
+              _this5.called_tokens.unshift(res.data);
 
-              _this4.token = res.data;
+              _this5.token = res.data;
 
-              _this4.setDataForTimer(_this4.token);
+              _this5.setDataForTimer(_this5.token);
 
-              _this4.isCalled = true;
-              _this4.openCategoryClicked = false;
+              _this5.isCalled = true;
+              _this5.openCategoryClicked = false;
 
-              _this4.disableLoader();
+              _this5.disableLoader();
 
               M.toast({
-                html: (_window9 = window) === null || _window9 === void 0 ? void 0 : (_window9$JLToken = _window9.JLToken) === null || _window9$JLToken === void 0 ? void 0 : _window9$JLToken.called_lang
+                html: (_window10 = window) === null || _window10 === void 0 ? void 0 : (_window10$JLToken = _window10.JLToken) === null || _window10$JLToken === void 0 ? void 0 : _window10$JLToken.called_lang
               });
             }
 
-            _this4.callNextClicked = false;
-            _this4.openCategoryClicked = false;
+            _this5.callNextClicked = false;
+            _this5.openCategoryClicked = false;
           }
         })["catch"](function (err) {
-          var _window10, _window10$JLToken;
+          var _window11, _window11$JLToken;
 
-          _this4.isCalled = false;
-          _this4.callNextClicked = false;
-          _this4.openCategoryClicked = false;
+          _this5.isCalled = false;
+          _this5.callNextClicked = false;
+          _this5.openCategoryClicked = false;
 
-          _this4.disableLoader();
+          _this5.disableLoader();
 
           M.toast({
-            html: (_window10 = window) === null || _window10 === void 0 ? void 0 : (_window10$JLToken = _window10.JLToken) === null || _window10$JLToken === void 0 ? void 0 : _window10$JLToken.error_lang,
+            html: (_window11 = window) === null || _window11 === void 0 ? void 0 : (_window11$JLToken = _window11.JLToken) === null || _window11$JLToken === void 0 ? void 0 : _window11$JLToken.error_lang,
             classes: "toast-error"
           });
         });
       },
       serveToken: function serveToken(id) {
-        var _this5 = this;
+        var _this6 = this;
 
         this.enableLoader();
         this.servedClicked = true;
@@ -19929,59 +20017,59 @@ if (document.getElementById("call-page")) {
         };
         axios.post(window.JLToken.serve_token_url, data).then(function (res) {
           if (res.data && res.data.status_code && res.data.status_code == 500) {
-            var _window11, _window11$JLToken;
+            var _window12, _window12$JLToken;
 
-            _this5.servedClicked = false;
+            _this6.servedClicked = false;
 
-            _this5.disableLoader();
+            _this6.disableLoader();
 
             M.toast({
-              html: (_window11 = window) === null || _window11 === void 0 ? void 0 : (_window11$JLToken = _window11.JLToken) === null || _window11$JLToken === void 0 ? void 0 : _window11$JLToken.error_lang,
+              html: (_window12 = window) === null || _window12 === void 0 ? void 0 : (_window12$JLToken = _window12.JLToken) === null || _window12$JLToken === void 0 ? void 0 : _window12$JLToken.error_lang,
               classes: "toast-error"
             });
           } else if (res.data && res.data.already_executed && res.data.already_executed == true) {
-            var _window12, _window12$JLToken;
+            var _window13, _window13$JLToken;
 
-            _this5.servedClicked = false;
+            _this6.servedClicked = false;
 
-            _this5.disableLoader();
+            _this6.disableLoader();
 
             M.toast({
-              html: (_window12 = window) === null || _window12 === void 0 ? void 0 : (_window12$JLToken = _window12.JLToken) === null || _window12$JLToken === void 0 ? void 0 : _window12$JLToken.alredy_used_lang,
+              html: (_window13 = window) === null || _window13 === void 0 ? void 0 : (_window13$JLToken = _window13.JLToken) === null || _window13$JLToken === void 0 ? void 0 : _window13$JLToken.alredy_used_lang,
               classes: "toast-error"
             });
           } else {
-            _this5.called_tokens = _this5.called_tokens.filter(function (element) {
+            _this6.called_tokens = _this6.called_tokens.filter(function (element) {
               return element.id != id;
             });
-            _this5.token = res.data;
+            _this6.token = res.data;
 
-            _this5.called_tokens.unshift(res.data);
+            _this6.called_tokens.unshift(res.data);
 
-            _this5.isCalled = false;
-            _this5.servedClicked = false;
+            _this6.isCalled = false;
+            _this6.servedClicked = false;
 
-            _this5.disableLoader();
+            _this6.disableLoader();
 
             M.toast({
               html: 'Served'
             });
           }
         })["catch"](function (err) {
-          var _window13, _window13$JLToken;
+          var _window14, _window14$JLToken;
 
-          _this5.servedClicked = false;
+          _this6.servedClicked = false;
 
-          _this5.disableLoader();
+          _this6.disableLoader();
 
           M.toast({
-            html: (_window13 = window) === null || _window13 === void 0 ? void 0 : (_window13$JLToken = _window13.JLToken) === null || _window13$JLToken === void 0 ? void 0 : _window13$JLToken.error_lang,
+            html: (_window14 = window) === null || _window14 === void 0 ? void 0 : (_window14$JLToken = _window14.JLToken) === null || _window14$JLToken === void 0 ? void 0 : _window14$JLToken.error_lang,
             classes: "toast-error"
           });
         });
       },
       noShowToken: function noShowToken(id) {
-        var _this6 = this;
+        var _this7 = this;
 
         this.enableLoader();
         this.noshowClicked = true;
@@ -19990,58 +20078,58 @@ if (document.getElementById("call-page")) {
         };
         axios.post(window.JLToken.noshow_token_url, data).then(function (res) {
           if (res.data && res.data.status_code && res.data.status_code == 500) {
-            var _window14, _window14$JLToken;
-
-            _this6.disableLoader();
-
-            M.toast({
-              html: (_window14 = window) === null || _window14 === void 0 ? void 0 : (_window14$JLToken = _window14.JLToken) === null || _window14$JLToken === void 0 ? void 0 : _window14$JLToken.error_lang,
-              classes: "toast-error"
-            });
-            _this6.noshowClicked = false;
-          } else if (res.data && res.data.already_executed && res.data.already_executed == true) {
             var _window15, _window15$JLToken;
 
-            _this6.disableLoader();
+            _this7.disableLoader();
 
             M.toast({
-              html: (_window15 = window) === null || _window15 === void 0 ? void 0 : (_window15$JLToken = _window15.JLToken) === null || _window15$JLToken === void 0 ? void 0 : _window15$JLToken.alredy_used_lang,
+              html: (_window15 = window) === null || _window15 === void 0 ? void 0 : (_window15$JLToken = _window15.JLToken) === null || _window15$JLToken === void 0 ? void 0 : _window15$JLToken.error_lang,
               classes: "toast-error"
             });
-            _this6.noshowClicked = false;
-          } else {
+            _this7.noshowClicked = false;
+          } else if (res.data && res.data.already_executed && res.data.already_executed == true) {
             var _window16, _window16$JLToken;
 
-            _this6.token = res.data;
-            _this6.called_tokens = _this6.called_tokens.filter(function (element) {
+            _this7.disableLoader();
+
+            M.toast({
+              html: (_window16 = window) === null || _window16 === void 0 ? void 0 : (_window16$JLToken = _window16.JLToken) === null || _window16$JLToken === void 0 ? void 0 : _window16$JLToken.alredy_used_lang,
+              classes: "toast-error"
+            });
+            _this7.noshowClicked = false;
+          } else {
+            var _window17, _window17$JLToken;
+
+            _this7.token = res.data;
+            _this7.called_tokens = _this7.called_tokens.filter(function (element) {
               return element.id != id;
             });
 
-            _this6.called_tokens.unshift(res.data);
+            _this7.called_tokens.unshift(res.data);
 
-            _this6.isCalled = false;
-            _this6.noshowClicked = false;
+            _this7.isCalled = false;
+            _this7.noshowClicked = false;
 
-            _this6.disableLoader();
+            _this7.disableLoader();
 
             M.toast({
-              html: (_window16 = window) === null || _window16 === void 0 ? void 0 : (_window16$JLToken = _window16.JLToken) === null || _window16$JLToken === void 0 ? void 0 : _window16$JLToken.noshow_lang
+              html: (_window17 = window) === null || _window17 === void 0 ? void 0 : (_window17$JLToken = _window17.JLToken) === null || _window17$JLToken === void 0 ? void 0 : _window17$JLToken.noshow_lang
             });
           }
         })["catch"](function (err) {
-          var _window17, _window17$JLToken;
+          var _window18, _window18$JLToken;
 
-          _this6.disableLoader();
+          _this7.disableLoader();
 
           M.toast({
-            html: (_window17 = window) === null || _window17 === void 0 ? void 0 : (_window17$JLToken = _window17.JLToken) === null || _window17$JLToken === void 0 ? void 0 : _window17$JLToken.error_lang,
+            html: (_window18 = window) === null || _window18 === void 0 ? void 0 : (_window18$JLToken = _window18.JLToken) === null || _window18$JLToken === void 0 ? void 0 : _window18$JLToken.error_lang,
             classes: "toast-error"
           });
-          _this6.noshowClicked = false;
+          _this7.noshowClicked = false;
         });
       },
       recallToken: function recallToken(id) {
-        var _this7 = this;
+        var _this8 = this;
 
         this.enableLoader();
         this.recallClicked = true;
@@ -20051,50 +20139,50 @@ if (document.getElementById("call-page")) {
         };
         axios.post(window.JLToken.recall_token_url, data).then(function (res) {
           if (res.data && res.data.status_code == 500) {
-            var _window18, _window18$JLToken;
+            var _window19, _window19$JLToken;
 
-            _this7.recallClicked = false;
-            _this7.isCalled = true;
+            _this8.recallClicked = false;
+            _this8.isCalled = true;
 
-            _this7.disableLoader();
+            _this8.disableLoader();
 
             M.toast({
-              html: (_window18 = window) === null || _window18 === void 0 ? void 0 : (_window18$JLToken = _window18.JLToken) === null || _window18$JLToken === void 0 ? void 0 : _window18$JLToken.error_lang,
+              html: (_window19 = window) === null || _window19 === void 0 ? void 0 : (_window19$JLToken = _window19.JLToken) === null || _window19$JLToken === void 0 ? void 0 : _window19$JLToken.error_lang,
               classes: "toast-error"
             });
           } else {
-            var _window19, _window19$JLToken;
+            var _window20, _window20$JLToken;
 
-            _this7.called_tokens = _this7.called_tokens.filter(function (element) {
+            _this8.called_tokens = _this8.called_tokens.filter(function (element) {
               return element.id != id;
             });
 
-            _this7.called_tokens.unshift(res.data);
+            _this8.called_tokens.unshift(res.data);
 
-            _this7.token = res.data;
+            _this8.token = res.data;
 
-            _this7.setDataForTimer(_this7.token);
+            _this8.setDataForTimer(_this8.token);
 
-            _this7.recallClicked = false;
-            _this7.openCategoryClicked = false;
-            _this7.isCalled = true;
+            _this8.recallClicked = false;
+            _this8.openCategoryClicked = false;
+            _this8.isCalled = true;
 
-            _this7.disableLoader();
+            _this8.disableLoader();
 
             M.toast({
-              html: (_window19 = window) === null || _window19 === void 0 ? void 0 : (_window19$JLToken = _window19.JLToken) === null || _window19$JLToken === void 0 ? void 0 : _window19$JLToken.recalled_lang
+              html: (_window20 = window) === null || _window20 === void 0 ? void 0 : (_window20$JLToken = _window20.JLToken) === null || _window20$JLToken === void 0 ? void 0 : _window20$JLToken.recalled_lang
             });
           }
         })["catch"](function (err) {
-          var _window20, _window20$JLToken;
+          var _window21, _window21$JLToken;
 
-          _this7.recallClicked = false;
-          _this7.isCalled = true;
+          _this8.recallClicked = false;
+          _this8.isCalled = true;
 
-          _this7.disableLoader();
+          _this8.disableLoader();
 
           M.toast({
-            html: (_window20 = window) === null || _window20 === void 0 ? void 0 : (_window20$JLToken = _window20.JLToken) === null || _window20$JLToken === void 0 ? void 0 : _window20$JLToken.error_lang,
+            html: (_window21 = window) === null || _window21 === void 0 ? void 0 : (_window21$JLToken = _window21.JLToken) === null || _window21$JLToken === void 0 ? void 0 : _window21$JLToken.error_lang,
             classes: "toast-error"
           });
         });
@@ -20106,16 +20194,16 @@ if (document.getElementById("call-page")) {
         $('body').addClass('loaded');
       },
       timer: function timer() {
-        var _this8 = this;
+        var _this9 = this;
 
         this.timer_interval = setInterval(function () {
-          if (parseInt(_this8.count) <= 0) {
+          if (parseInt(_this9.count) <= 0) {
             clearInterval();
             return;
           }
 
-          _this8.time_after_called = _this8.toHHMMSS(_this8.count);
-          _this8.count = (parseInt(_this8.count) + 1).toString();
+          _this9.time_after_called = _this9.toHHMMSS(_this9.count);
+          _this9.count = (parseInt(_this9.count) + 1).toString();
         }, 1000);
       },
       toHHMMSS: function toHHMMSS(count) {
@@ -20246,13 +20334,19 @@ if (document.getElementById("display-page")) {
         response_data2: [],
         previous_data3: [],
         response_data3: [],
+        token_label_1: '',
+        token_label_2: '',
+        token_label_3: '',
         called_tokens: [],
+        called_tokens_timer: [],
+        called_tokens_timer_second: [],
         tokens_for_next_to_call1: [],
         tokens_for_next_to_call2: [],
         tokens_for_next_to_call3: [],
         date: (_window$JLToken$date_2 = (_window$JLToken = window.JLToken) === null || _window$JLToken === void 0 ? void 0 : _window$JLToken.date_for_display) !== null && _window$JLToken$date_2 !== void 0 ? _window$JLToken$date_2 : null,
         audio: (_window2 = window) === null || _window2 === void 0 ? void 0 : _window2.JLToken.audioEl,
-        token_for_sound: null
+        token_for_sound: null,
+        time_after_called: 0
       };
     },
     methods: {
@@ -20726,23 +20820,84 @@ if (document.getElementById("display-page")) {
             });
           }
         }
+      },
+      showDisplayCategoryTimer: function showDisplayCategoryTimer() {
+        var _this9 = this;
+
+        console.log('aa'); // var old_token=this.called_tokens;
+        // this.time_after_called = 0;
+        // $.each(old_token,function(key,value){
+        //     if(value.status=='RECALL')
+        //     {
+        //         const postdata = {
+        //             ended_at: value.ended_at,
+        //             category_time:value.category_time
+        //         }
+        //         axios.post(window?.JLToken.get_server_timer,postdata).then(res => {
+        //             console.log(res.data)
+        //             this.timer=res.data
+        //         })
+        //     }
+        // })
+        // const oldTokens = this.tokens_for_next_to_call1;
+        // const oldTokens = this.recall_tokens;
+
+        var oldTokens = this.tokens_for_next_to_call1.concat(this.tokens_for_next_to_call2, this.tokens_for_next_to_call3);
+        console.log(oldTokens);
+        this.time_after_called = 0;
+        oldTokens.forEach(function (value, index) {
+          var _window10;
+
+          // if (value.status === 'RECALL') {}
+          var postdata = {
+            created_at: value.created_at,
+            id: value.id
+          };
+          var ids = value.id;
+          var service_ids = value.service_id;
+          axios.post((_window10 = window) === null || _window10 === void 0 ? void 0 : _window10.JLToken.get_token_timer, postdata).then(function (res) {
+            // console.log(res.data.with_second);
+            _this9.timer = res.data; // this.called_tokens_timer.push(res.data);
+
+            var new_id = res.data.id;
+
+            _this9.called_tokens_timer.splice(ids, 1, res.data.without_second); // this.called_tokens_timer_second.splice(ids,1, res.data.with_second);
+            //this.called_tokens_timer_second.splice(res.data.id,1, res.data.with_second);
+
+
+            _this9.called_tokens_timer_second[new_id] = res.data.with_second;
+            _this9.called_tokens_timer[new_id] = res.data.without_second;
+            console.log(_this9.called_tokens_timer_second);
+          })["catch"](function (error) {
+            console.error("Error:", error);
+          });
+        });
+        setTimeout(function () {
+          _this9.showDisplayCategoryTimer();
+        }, 1000);
       }
     },
     mounted: function mounted() {
-      var _this9 = this;
+      var _window11,
+          _window12,
+          _window13,
+          _this10 = this;
 
+      this.token_label_1 = (_window11 = window) === null || _window11 === void 0 ? void 0 : _window11.JLToken.selectedServiceLabel1;
+      this.token_label_2 = (_window12 = window) === null || _window12 === void 0 ? void 0 : _window12.JLToken.selectedServiceLabel2;
+      this.token_label_3 = (_window13 = window) === null || _window13 === void 0 ? void 0 : _window13.JLToken.selectedServiceLabel3;
       this.audio.addEventListener("ended", function () {
-        if (_this9.token_for_sound) {
-          var _window10, _window10$JLToken, _window11, _window11$JLToken, _window12, _window12$JLToken;
+        if (_this10.token_for_sound) {
+          var _window14, _window14$JLToken, _window15, _window15$JLToken, _window16, _window16$JLToken;
 
-          var voice = "".concat((_window10 = window) === null || _window10 === void 0 ? void 0 : (_window10$JLToken = _window10.JLToken) === null || _window10$JLToken === void 0 ? void 0 : _window10$JLToken.voice_content_one, " ").concat(_this9.token_for_sound.token_letter.toString().split('').join(' '), " ").concat(_this9.token_for_sound.token_number.toString().split('').join(' '), " ").concat((_window11 = window) === null || _window11 === void 0 ? void 0 : (_window11$JLToken = _window11.JLToken) === null || _window11$JLToken === void 0 ? void 0 : _window11$JLToken.voice_content_two, " ").concat(_this9.token_for_sound.counter.name);
-          responsiveVoice.speak(voice, (_window12 = window) === null || _window12 === void 0 ? void 0 : (_window12$JLToken = _window12.JLToken) === null || _window12$JLToken === void 0 ? void 0 : _window12$JLToken.voice_type, {
+          var voice = "".concat((_window14 = window) === null || _window14 === void 0 ? void 0 : (_window14$JLToken = _window14.JLToken) === null || _window14$JLToken === void 0 ? void 0 : _window14$JLToken.voice_content_one, " ").concat(_this10.token_for_sound.token_letter.toString().split('').join(' '), " ").concat(_this10.token_for_sound.token_number.toString().split('').join(' '), " ").concat((_window15 = window) === null || _window15 === void 0 ? void 0 : (_window15$JLToken = _window15.JLToken) === null || _window15$JLToken === void 0 ? void 0 : _window15$JLToken.voice_content_two, " ").concat(_this10.token_for_sound.counter.name);
+          responsiveVoice.speak(voice, (_window16 = window) === null || _window16 === void 0 ? void 0 : (_window16$JLToken = _window16.JLToken) === null || _window16$JLToken === void 0 ? void 0 : _window16$JLToken.voice_type, {
             rate: 0.75,
             onend: function onend() {
-              _this9.token_for_sound = null;
-              _this9.isPlaying = false;
+              _this10.token_for_sound = null;
+              _this10.isPlaying = false;
 
-              _this9.processQueue();
+              _this10.processQueue();
             }
           });
         }
@@ -20754,6 +20909,7 @@ if (document.getElementById("display-page")) {
       this.getTokensFromFile1();
       this.getTokensFromFile2();
       this.getTokensFromFile3();
+      this.showDisplayCategoryTimer();
     },
     unmounted: function unmounted() {
       clearInterval(this.time_out);
@@ -20800,6 +20956,9 @@ if (document.getElementById("recall-display-page")) {
         response_data2: [],
         previous_data3: [],
         response_data3: [],
+        token_label_1: '',
+        token_label_2: '',
+        token_label_3: '',
         called_tokens: [],
         recall_tokens: [],
         called_tokens_timer: [],
@@ -21343,14 +21502,20 @@ if (document.getElementById("recall-display-page")) {
       }
     },
     mounted: function mounted() {
-      var _this10 = this;
+      var _window11,
+          _window12,
+          _window13,
+          _this10 = this;
 
+      this.token_label_1 = (_window11 = window) === null || _window11 === void 0 ? void 0 : _window11.JLToken.selectedServiceLabel1;
+      this.token_label_2 = (_window12 = window) === null || _window12 === void 0 ? void 0 : _window12.JLToken.selectedServiceLabel2;
+      this.token_label_3 = (_window13 = window) === null || _window13 === void 0 ? void 0 : _window13.JLToken.selectedServiceLabel3;
       this.audio.addEventListener("ended", function () {
         if (_this10.token_for_sound) {
-          var _window11, _window11$JLToken, _window12, _window12$JLToken, _window13, _window13$JLToken;
+          var _window14, _window14$JLToken, _window15, _window15$JLToken, _window16, _window16$JLToken;
 
-          var voice = "".concat((_window11 = window) === null || _window11 === void 0 ? void 0 : (_window11$JLToken = _window11.JLToken) === null || _window11$JLToken === void 0 ? void 0 : _window11$JLToken.voice_content_one, " ").concat(_this10.token_for_sound.token_letter.toString().split('').join(' '), " ").concat(_this10.token_for_sound.token_number.toString().split('').join(' '), " ").concat((_window12 = window) === null || _window12 === void 0 ? void 0 : (_window12$JLToken = _window12.JLToken) === null || _window12$JLToken === void 0 ? void 0 : _window12$JLToken.voice_content_two, " ").concat(_this10.token_for_sound.counter.name);
-          responsiveVoice.speak(voice, (_window13 = window) === null || _window13 === void 0 ? void 0 : (_window13$JLToken = _window13.JLToken) === null || _window13$JLToken === void 0 ? void 0 : _window13$JLToken.voice_type, {
+          var voice = "".concat((_window14 = window) === null || _window14 === void 0 ? void 0 : (_window14$JLToken = _window14.JLToken) === null || _window14$JLToken === void 0 ? void 0 : _window14$JLToken.voice_content_one, " ").concat(_this10.token_for_sound.token_letter.toString().split('').join(' '), " ").concat(_this10.token_for_sound.token_number.toString().split('').join(' '), " ").concat((_window15 = window) === null || _window15 === void 0 ? void 0 : (_window15$JLToken = _window15.JLToken) === null || _window15$JLToken === void 0 ? void 0 : _window15$JLToken.voice_content_two, " ").concat(_this10.token_for_sound.counter.name);
+          responsiveVoice.speak(voice, (_window16 = window) === null || _window16 === void 0 ? void 0 : (_window16$JLToken = _window16.JLToken) === null || _window16$JLToken === void 0 ? void 0 : _window16$JLToken.voice_type, {
             rate: 0.75,
             onend: function onend() {
               _this10.token_for_sound = null;

@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Consts\CallStatuses;
 use App\Jobs\SendSmsJob;
 use App\Models\Call;
+use App\Models\CallsHistory;
 use App\Models\Queue;
 use App\Models\Service;
 use Carbon\Carbon;
@@ -45,8 +46,23 @@ class CallRepository
                     'token_number' => $queue->number,
                     'called_date' => Carbon::now()->toDateString(),
                     'started_at' => Carbon::now(),
+                    'waiting_time' => $queue->created_at->diff(Carbon::now())->format('%H:%I:%S'),
+                    'no_of_call' => 1
+                ]);
+                /** Maintain history */
+                $calls_history = CallsHistory::create([
+                    'queue_id' => $queue->id,
+                    'service_id' => $queue->service_id,
+                    'counter_id' => session()->get('counter')->id,
+                    'user_id' => Auth::user()->id,
+                    'token_letter' => $queue->letter,
+                    'token_number' => $queue->number,
+                    'date_time' => Carbon::now(),
+                    'called_date' => Carbon::now()->toDateString(),
+                    'started_at' => Carbon::now(),
                     'waiting_time' => $queue->created_at->diff(Carbon::now())->format('%H:%I:%S')
                 ]);
+                /** end history */
                 $queue->position = 0;
                 $queue->called = true;
                 $queue->save();
@@ -80,8 +96,23 @@ class CallRepository
                 'token_number' => $queue->number,
                 'called_date' => Carbon::now()->toDateString(),
                 'started_at' => Carbon::now(),
+                'waiting_time' => $queue->created_at->diff(Carbon::now())->format('%H:%I:%S'),
+                'no_of_call' => 1
+            ]);
+            /** Maintain history */
+            $calls_history = CallsHistory::create([
+                'queue_id' => $queue->id,
+                'service_id' => $queue->service_id,
+                'counter_id' => session()->get('counter')->id,
+                'user_id' => Auth::user()->id,
+                'token_letter' => $queue->letter,
+                'token_number' => $queue->number,
+                'date_time' => Carbon::now(),
+                'called_date' => Carbon::now()->toDateString(),
+                'started_at' => Carbon::now(),
                 'waiting_time' => $queue->created_at->diff(Carbon::now())->format('%H:%I:%S')
             ]);
+            /** end history */
             $queue->called = true;
             $queue->position = 0;
             $queue->save();
@@ -99,6 +130,21 @@ class CallRepository
         $call->turn_around_time = Carbon::parse($call->waiting_time)->add(Carbon::parse($call->started_at)->diff(Carbon::now()))->toTimeString();
         $call->call_status_id = CallStatuses::SERVED;
         $call->save();
+
+        /** Maintain history */
+        $calls_history = CallsHistory::create([
+            'queue_id' => $call->queue_id,
+            'service_id' => $call->service_id,
+            'counter_id' => session()->get('counter')->id,
+            'user_id' => Auth::user()->id,
+            'token_letter' => $call->letter,
+            'token_number' => $call->number,
+            'date_time' => Carbon::now(),
+            'called_date' => Carbon::now()->toDateString(),
+            'started_at' => Carbon::now(),
+            'waiting_time' => $call->created_at->diff(Carbon::now())->format('%H:%I:%S')
+        ]);
+        /** end history */
         return $call;
     }
 
@@ -127,7 +173,26 @@ class CallRepository
             'category' => $copy->category,
             'status' => $copy->status,
             'is_recall' => $copy->is_recall,
+            'no_of_call' => ($copy->no_of_call)+1
         ]);
+        /** Maintain history */
+        $calls_history = CallsHistory::create([
+            'queue_id' => $copy->queue_id,
+            'service_id' => $copy->service_id,
+            'counter_id' => $copy->counter_id,
+            'user_id' => $copy->user_id,
+            'token_letter' => $copy->token_letter,
+            'token_number' => $copy->token_number,
+            'date_time' => Carbon::now(),
+            'called_date' => $copy->called_date,
+            'started_at' => $copy->started_at,
+            'waiting_time' => $copy->waiting_time,
+            'category' => $copy->category,
+            'status' => $copy->status,
+            'is_recall' => $copy->is_recall,
+        ]);
+        /** end history */
+
         if($copy->is_recall==true)
         {
             $update_queue=Queue::where('id',$copy->queue_id)->first();
@@ -212,6 +277,10 @@ class CallRepository
         // else{
         // }
             $new_call = Call::find($call->id);
+
+            /** Maintain history */
+            $calls_history = new CallsHistory;
+
             if($request->status=='SEND TO DOCTOR')
             {
                 $status_id=1;
@@ -220,9 +289,20 @@ class CallRepository
                 $new_call->turn_around_time = Carbon::parse($call->waiting_time)->add(Carbon::parse($call->started_at)->diff(Carbon::now()))->toTimeString();
                 $new_call->call_status_id = CallStatuses::SERVED;
                 $new_call->re_call_status_id = CallStatuses::SERVED;
+
+                /** Maintain history */
+                $calls_history->ended_at = Carbon::now();
+                $calls_history->served_time = Carbon::parse($call->started_at)->diff(Carbon::now())->format('%H:%I:%S');
+                $calls_history->turn_around_time = Carbon::parse($call->waiting_time)->add(Carbon::parse($call->started_at)->diff(Carbon::now()))->toTimeString();
+                $calls_history->call_status_id = CallStatuses::SERVED;
+                $calls_history->re_call_status_id = CallStatuses::SERVED;
             }
             if($request->status=='RECALL'){
                 $new_call->ended_at = Carbon::now()->format('Y-m-d H:i:s');
+
+                 /** Maintain history */
+                 $calls_history->ended_at = Carbon::now()->format('Y-m-d H:i:s');
+
                 // if(($new_call->is_recall==1) &&  ($request->status=='RECALL'))
                 // {
                 //     $new_call->re_call_status_id = CallStatuses::SERVED;
@@ -239,6 +319,11 @@ class CallRepository
                     $new_call->call_status_id = CallStatuses::NOSHOW;
                     $new_call->is_recall=1;
 
+                    /** Maintain history */
+                    $calls_history->re_call_status_id = CallStatuses::NOSHOW;
+                    $calls_history->call_status_id = CallStatuses::NOSHOW;
+                    $calls_history->is_recall=1;
+
                     $update_queue=Queue::where('id',$call->queue_id)->first();
                     $update_queue->is_recalled=false;
                     $update_queue->save();
@@ -247,6 +332,11 @@ class CallRepository
                     $new_call->re_call_status_id = CallStatuses::NOSHOW;
                     $new_call->call_status_id = CallStatuses::NOSHOW;
                     $new_call->is_recall=1;
+
+                    /** Maintain history */
+                    $calls_history->re_call_status_id = CallStatuses::NOSHOW;
+                    $calls_history->call_status_id = CallStatuses::NOSHOW;
+                    $calls_history->is_recall=1;
                 }
 
                 // $new_call->re_call_status_id = CallStatuses::NOSHOW;
@@ -266,6 +356,13 @@ class CallRepository
                 $new_call->call_status_id = CallStatuses::SERVED;
                 $new_call->re_call_status_id = CallStatuses::SERVED;
 
+                /** Maintain history */
+                $calls_history->ended_at = Carbon::now();
+                $calls_history->served_time = Carbon::parse($call->started_at)->diff(Carbon::now())->format('%H:%I:%S');
+                $calls_history->turn_around_time = Carbon::parse($call->waiting_time)->add(Carbon::parse($call->started_at)->diff(Carbon::now()))->toTimeString();
+                $calls_history->call_status_id = CallStatuses::SERVED;
+                $calls_history->re_call_status_id = CallStatuses::SERVED;
+
                 $queue=Queue::find($call->queue_id);
                 $queue->is_recalled=true;
                 $queue->save();
@@ -274,6 +371,18 @@ class CallRepository
             $new_call->status=$request->status;
             $new_call->category_time=$request->category_time;
             $new_call->save();
+
+            /** Maintain history */
+            $calls_history->queue_id=$new_call->queue_id;
+            $calls_history->service_id=$new_call->service_id;
+            $calls_history->counter_id=$new_call->counter_id;
+            $calls_history->user_id=$new_call->user_id;
+            $calls_history->category=$request->category;
+            $calls_history->status=$request->status;
+            $calls_history->category_time=$request->category_time;
+            $calls_history->date_time = Carbon::now();
+            $calls_history->save();
+
             return $new_call;
     }
 

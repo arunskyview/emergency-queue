@@ -25,6 +25,9 @@ if (document.getElementById("recall-display-page")) {
                 response_data2: [],
                 previous_data3: [],
                 response_data3: [],
+                token_label_1:'',
+                token_label_2:'',
+                token_label_3:'',
 
                 called_tokens: [],
                 recall_tokens: [],
@@ -550,6 +553,9 @@ if (document.getElementById("recall-display-page")) {
             },
         },
         mounted() {
+            this.token_label_1=window?.JLToken.selectedServiceLabel1;
+            this.token_label_2=window?.JLToken.selectedServiceLabel2;
+            this.token_label_3=window?.JLToken.selectedServiceLabel3;
             this.audio.addEventListener("ended", () => {
                 if (this.token_for_sound) {
                     let voice = `${window?.JLToken?.voice_content_one} ${this.token_for_sound.token_letter.toString().split('').join(' ')} ${this.token_for_sound.token_number.toString().split('').join(' ')} ${window?.JLToken?.voice_content_two} ${this.token_for_sound.counter.name}`;

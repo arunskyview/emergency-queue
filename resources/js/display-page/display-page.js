@@ -26,13 +26,22 @@ if (document.getElementById("display-page")) {
                 previous_data3: [],
                 response_data3: [],
 
+                token_label_1:'',
+                token_label_2:'',
+                token_label_3:'',
+
                 called_tokens: [],
+
+                called_tokens_timer: [],
+                called_tokens_timer_second: [],
+
                 tokens_for_next_to_call1: [],
                 tokens_for_next_to_call2: [],
                 tokens_for_next_to_call3: [],
                 date: window.JLToken?.date_for_display ?? null,
                 audio: window?.JLToken.audioEl,
-                token_for_sound: null
+                token_for_sound: null,
+                time_after_called:0,
             }
         },
         methods: {
@@ -489,9 +498,66 @@ if (document.getElementById("display-page")) {
                     }
                 }
 
-            }
+            },
+            showDisplayCategoryTimer() {
+                console.log('aa');
+                // var old_token=this.called_tokens;
+                // this.time_after_called = 0;
+                // $.each(old_token,function(key,value){
+                //     if(value.status=='RECALL')
+                //     {
+                //         const postdata = {
+                //             ended_at: value.ended_at,
+                //             category_time:value.category_time
+                //         }
+                //         axios.post(window?.JLToken.get_server_timer,postdata).then(res => {
+                //             console.log(res.data)
+                //             this.timer=res.data
+                //         })
+                //     }
+                // })
+                // const oldTokens = this.tokens_for_next_to_call1;
+                // const oldTokens = this.recall_tokens;
+
+                const oldTokens = this.tokens_for_next_to_call1.concat(this.tokens_for_next_to_call2, this.tokens_for_next_to_call3);
+                console.log(oldTokens);
+                    this.time_after_called = 0;
+                    oldTokens.forEach((value, index) => {
+                        // if (value.status === 'RECALL') {}
+                            const postdata = {
+                                created_at: value.created_at,
+                                id: value.id
+                            };
+                            const ids=value.id;
+                            const service_ids=value.service_id;
+                            axios.post(window?.JLToken.get_token_timer, postdata)
+                                .then(res => {
+                                // console.log(res.data.with_second);
+                                this.timer = res.data;
+                                // this.called_tokens_timer.push(res.data);
+                                const new_id=res.data.id;
+                                this.called_tokens_timer.splice(ids,1, res.data.without_second);
+                                // this.called_tokens_timer_second.splice(ids,1, res.data.with_second);
+                                //this.called_tokens_timer_second.splice(res.data.id,1, res.data.with_second);
+                                this.called_tokens_timer_second[new_id]= res.data.with_second;
+                                this.called_tokens_timer[new_id]= res.data.without_second;
+                                console.log(this.called_tokens_timer_second);
+                                })
+                                .catch(error => {
+                                console.error("Error:", error);
+                                });
+
+                    });
+
+                setTimeout(() => {
+                    this.showDisplayCategoryTimer();
+                }, 1000)
+            },
         },
         mounted() {
+            this.token_label_1=window?.JLToken.selectedServiceLabel1;
+            this.token_label_2=window?.JLToken.selectedServiceLabel2;
+            this.token_label_3=window?.JLToken.selectedServiceLabel3;
             this.audio.addEventListener("ended", () => {
                 if (this.token_for_sound) {
                     let voice = `${window?.JLToken?.voice_content_one} ${this.token_for_sound.token_letter.toString().split('').join(' ')} ${this.token_for_sound.token_number.toString().split('').join(' ')} ${window?.JLToken?.voice_content_two} ${this.token_for_sound.counter.name}`;
@@ -512,6 +578,7 @@ if (document.getElementById("display-page")) {
             this.getTokensFromFile1();
             this.getTokensFromFile2();
             this.getTokensFromFile3();
+            this.showDisplayCategoryTimer();
         },
 
         unmounted() {

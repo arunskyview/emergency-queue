@@ -62,6 +62,8 @@ Route::middleware(['setLocale'])->group(function () {
             Route::get('get-called-tokens', [CallController::class, 'getCalledTokens'])->name('get-called-tokens');
             Route::post('change_category_url',[CallController::class,'changeCategory'])->name('change-category');
             Route::post('get-server-time',[CallController::class,'serverTime'])->name('get-server-time');
+            Route::post('get-token-time',[CallController::class,'tokenTime'])->name('get-token-time');
+            Route::post('get-token-category-and-status',[CallController::class,'categoryStatus'])->name('get-token-category-and-status');
         });
         //dashboard
 

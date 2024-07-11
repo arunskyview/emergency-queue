@@ -33,12 +33,18 @@
   @endif
   <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/loader/normalize.css')}}">
   <link rel="stylesheet" type="text/css" href="{{ asset('css/app.css') }}">
+
+
   <script src="{{asset('app-assets/js/voice.js?key=WfWmvaX0')}}"></script>
 
 
   <!-- vue js -->
   @yield('css')
-
+<style>
+    .tooltip-container .tooltiptext {
+  display: block;
+}
+</style>
   <!-- END: Custom CSS-->
 </head>
 <!-- END: Head-->
@@ -70,7 +76,7 @@
             </li>
             @endif
             <!-- <li class="navbar-list left"><a class="waves-effect waves-block waves-light profile-button" href="javascript:void(0);" data-target="extra-dropdown"><i class="material-icons">attachment</i></a></li> -->
-            <li class="navbar-list left"><a><b>{{$settings->name}},{{$settings->location}}</b></a></li>
+            {{-- <li class="navbar-list left"><a><b>{{$settings->name}},{{$settings->location}}</b></a></li> --}}
             @if(\Request::route()->getName() == 'show_call_page')<li class="dropdown-language"><a class="waves-effect waves-block waves-light translation-button" href="#" data-target="translation-dropdown"><span class="flag-icon flag-icon-{{\App::currentLocale()}}"></span></a></li>@endif
             <li id="side-menu-icon-attachment" class="navbar-list left"><a class="waves-effect waves-block waves-light profile-button" href="javascript:void(0);" data-target="extra-dropdown"><i class="material-icons">attachment</i></a></li>
             <li class="hide-on-med-and-down"><a class="waves-effect waves-block waves-light toggle-fullscreen" href="javascript:void(0);"><i class="material-icons">settings_overscan</i></a></li>
@@ -94,13 +100,13 @@
 
           <ul class="dropdown-content" id="translation-dropdown">
             <li class="dropdown-item" onclick="changeLanguage(1)" ontouchstart="changeLanguage(1)"><a class="grey-text text-darken-1" href="#!" data-language="en"><i class="flag-icon flag-icon-gb"></i> English</a></li>
-            <li class="dropdown-item" onclick="changeLanguage(2)" ontouchstart="changeLanguage(2)"><a class="grey-text text-darken-1" href="#!" data-language="fr"><i class="flag-icon flag-icon-fr"></i> French</a></li>
-            <li class="dropdown-item" onclick="changeLanguage(3)" ontouchstart="changeLanguage(3)"><a class="grey-text text-darken-1" href="#!" data-language="in"><i class="flag-icon flag-icon-in"></i> Hindi</a></li>
+            {{-- <li class="dropdown-item" onclick="changeLanguage(2)" ontouchstart="changeLanguage(2)"><a class="grey-text text-darken-1" href="#!" data-language="fr"><i class="flag-icon flag-icon-fr"></i> French</a></li> --}}
+            {{-- <li class="dropdown-item" onclick="changeLanguage(3)" ontouchstart="changeLanguage(3)"><a class="grey-text text-darken-1" href="#!" data-language="in"><i class="flag-icon flag-icon-in"></i> Hindi</a></li> --}}
             <li class="dropdown-item" onclick="changeLanguage(4)" ontouchstart="changeLanguage(4)"><a class="grey-text text-darken-1" href="#!" data-language="sa"><i class="flag-icon flag-icon-sa"></i> Arabic</a></li>
-            <li class="dropdown-item" onclick="changeLanguage(5)" ontouchstart="changeLanguage(5)"><a class="grey-text text-darken-1" href="#!" data-language="sa"><i class="flag-icon flag-icon-es"></i> Spanish</a></li>
-            <li class="dropdown-item" onclick="changeLanguage(6)" ontouchstart="changeLanguage(6)"><a class="grey-text text-darken-1" href="#!" data-language="sa"><i class="flag-icon flag-icon-pt"></i> Portuguese</a></li>
-            <li class="dropdown-item" onclick="changeLanguage(7)" ontouchstart="changeLanguage(7)"><a class="grey-text text-darken-1" href="#!" data-language="sa"><i class="flag-icon flag-icon-it"></i> Italian</a></li>
-            <li class="dropdown-item" onclick="changeLanguage(8)" ontouchstart="changeLanguage(8)"><a class="grey-text text-darken-1" href="#!" data-language="sa"><i class="flag-icon flag-icon-id"></i> Indonesian</a></li>
+            {{-- <li class="dropdown-item" onclick="changeLanguage(5)" ontouchstart="changeLanguage(5)"><a class="grey-text text-darken-1" href="#!" data-language="sa"><i class="flag-icon flag-icon-es"></i> Spanish</a></li> --}}
+            {{-- <li class="dropdown-item" onclick="changeLanguage(6)" ontouchstart="changeLanguage(6)"><a class="grey-text text-darken-1" href="#!" data-language="sa"><i class="flag-icon flag-icon-pt"></i> Portuguese</a></li> --}}
+            {{-- <li class="dropdown-item" onclick="changeLanguage(7)" ontouchstart="changeLanguage(7)"><a class="grey-text text-darken-1" href="#!" data-language="sa"><i class="flag-icon flag-icon-it"></i> Italian</a></li> --}}
+            {{-- <li class="dropdown-item" onclick="changeLanguage(8)" ontouchstart="changeLanguage(8)"><a class="grey-text text-darken-1" href="#!" data-language="sa"><i class="flag-icon flag-icon-id"></i> Indonesian</a></li> --}}
           </ul>
 
         </div>
@@ -173,10 +179,12 @@
                     </div>
                   </li>
                     <div>
+
                         <table v-if="show_called" style="font-size:20px;">
                             <thead>
                                 <tr>
                                     <th>Recall</th>
+                                    <th>Called</th>
                                     <th>Token (MRN Number)</th>
                                     <th>Status</th>
                                     <th>Category</th>
@@ -186,11 +194,17 @@
                             </thead>
                             <tbody>
                                 <tr v-for=" (token, index) in called_tokens">
-                                    <td><div @click="(token.call_status_id == {{CallStatuses::NOSHOW}} && !isCalled) ? recallToken(token.id) : ''" style="border-radius:50%; display:flex; align-items:center; padding:5px; width: 45px;height: 44px;justify-content: center;" :class="{'recall-active': token.call_status_id == {{CallStatuses::NOSHOW}} && !isCalled, 'disabled-color': token.call_status_id != {{CallStatuses::NOSHOW}} || isCalled }"><i class="material-icons" style="font-size: 30px; color:#fff">replay</i></div></td>
-                                    <td><h6 style="margin: 0px; font-size:20px; font-weight:600;">@{{token.token_letter}}-@{{token.token_number}} (@{{token.mrn_no.mrn.mrn_no}}) <a href="#" data-toggle="tooltip" :title="'First Name:-'+token.mrn_no.mrn.first_name_en +'\nMiddle Name:-'+token.mrn_no.mrn.middle_name_en +'\nLast Name:-'+ token.mrn_no.mrn.last_name_en+'\nGender:-'+token.mrn_no.mrn.gender+'\nNational Id:-'+token.mrn_no.mrn.national_id+'\nDOB:-'+token.mrn_no.mrn.dob"><span class="material-icons" style="font-size: 30px; color:#000">info</span></a></h6> </td>
-                                    <td><span style="background-color: #009688; padding: 0 5px; color:#fff; font-weight:600; min-width:22px" v-if="token.call_status_id == {{CallStatuses::SERVED}}">S</span> <span style="background-color: #ff0000; padding: 0 5px; color:#fff; font-weight:600; min-width:22px" v-if="token.call_status_id != {{CallStatuses::SERVED}}">N</span></td>
+                                    <td><div @click="(token.call_status_id == {{CallStatuses::NOSHOW}} && !isCalled) ? recallToken(token.id) : ''" style="border-radius:50%; display:flex; align-items:center; padding:5px; width: 45px;height: 44px;justify-content: center;" :class="{'recall-active': token.call_status_id == {{CallStatuses::NOSHOW}} && !isCalled, 'disabled-color': token.call_status_id != {{CallStatuses::NOSHOW}} || isCalled }"><i class="material-icons" style="font-size: 30px; color:#fff">replay</i></div> </td>
+                                    <td><span style="background-color:brown;color:#fff;padding:6px;border-radius:8px;font-weight:600;min-width:22px;margin-right:5px;">@{{token.no_of_call}}</span><small>times</small</td>
+                                    <td>
+                                        <h6 style="margin: 0px; font-size:20px; font-weight:600;">@{{token.token_letter}}-@{{token.token_number}} (@{{token.mrn_no.mrn.mrn_no}}) <a data-position="top" :data-tooltip="'First Name:'+token.mrn_no.mrn.first_name_en +' '+token.mrn_no.mrn.middle_name_en +' '+ token.mrn_no.mrn.last_name_en+', \n Gender:'+token.mrn_no.mrn.gender+', \n National Id:'+token.mrn_no.mrn.national_id+', \n DOB:'+token.mrn_no.mrn.dob"><span class="material-icons" style="font-size: 30px; color:#000">info</span></a></h6>
+                                    </td>
+                                    <td><span style="background-color: #009688; padding: 0 5px; color:#fff; font-weight:600; min-width:22px" v-if="token.call_status_id == {{CallStatuses::SERVED}}">Served</span> <span style="background-color: #ff0000; padding: 0 5px; color:#fff; font-weight:600; min-width:22px" v-if="token.call_status_id != {{CallStatuses::SERVED}}">Triage</span></td>
                                     <td><span :style="{'background-color':token.category === 'CAT 3' ? '{{CallStatuses::CAT3}}' :token.category === 'CAT 4' ? '{{CallStatuses::CAT4}}' :token.category === 'CAT 5' ? '{{CallStatuses::CAT5}}' :'','color':'#fff', 'padding': '6px','border-radius': '8px',  'font-weight':'600', 'min-width':'22px', 'margin-right':'5px'}">@{{token.category}}</span></td>
-                                    <td><span  v-if="token.status == 'RECALL' && token.ended_at!=null" :style="{'padding': '6px','font-weight':'600','border-radius': '8px','background-color':called_tokens_timer[token.queue_id] >= token.category_time? '#f99999':'','color':'#000'}"> @{{called_tokens_timer_second[token.queue_id]}} / @{{token.category_time}}</span></td>
+                                    <td>
+                                        <span  v-if="token.status == 'RECALL' && token.ended_at!=null" :style="{'padding': '6px','font-weight':'600','border-radius': '8px','background-color':called_tokens_timer[token.queue_id] >= token.category_time? '#f99999':'','color':'#000'}"> @{{called_tokens_timer_second[token.queue_id]}} / @{{token.category_time}} <img v-if="called_tokens_timer[token.queue_id] >= token.category_time" src="{{ asset('storage/notification.gif')}}" style="max-width:45px;"> </span>
+                                            <span  v-if="token.status == 'SEND TO DOCTOR'" :style="{'padding': '6px','font-weight':'600','border-radius': '8px','background-color':'#c9c2c2','color':'#000'}"> Closed</span>
+                                    </td>
                                     <td><span  :style="{'background-color': token.status === 'SEND TO DOCTOR' ? '{{CallStatuses::SEND_TO_WAITING}}' :token.status === 'RECALL' ? '{{CallStatuses::RECALL}}' :'', 'padding': '6px', 'color':'#fff', 'font-weight':'600', 'min-width':'22px','border-radius': '8px'}" v-if='token.status'>@{{token.status}}</span></td>
                                 </tr>
                             </tbody>
@@ -266,6 +280,9 @@
   <script src="{{asset('app-assets/vendors/jquery-validation/jquery.validate.min.js')}}"></script>
 
 
+
+
+
   <!-- BEGIN VENDOR JS-->
   @yield('js')
   <script>
@@ -329,6 +346,10 @@
         }
 
         $(document).ready(function(){
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+
+        $(document).on("click", '.selected-token', function(e) {
             $('[data-toggle="tooltip"]').tooltip();
         });
   </script>

@@ -31,19 +31,22 @@ class TokenController extends Controller
 
     public function issueToken()
     {
-        $user_id=Auth::user()->id;
-        $alloted=AllotCounter::where('user_id',$user_id)->first();
-        if($user_id !=1)
-        {
-            $show_service=$this->services->getEachActiveServices($alloted->service_id);
+        if (auth()->guard('web')->check()) {
+            $user_id=Auth::user()->id;
+            $alloted=AllotCounter::where('user_id',$user_id)->first();
+            if($user_id !=1)
+            {
+                $show_service=$this->services->getEachActiveServices($alloted->service_id);
+            }
+            else{
+                $show_service=$this->services->getAllActiveServices();
+            }
+            return view(
+                'issue_token.index',
+                ['services' => $show_service, 'settings' => Setting::first()]
+            );
         }
-        else{
-            $show_service=$this->services->getAllActiveServices();
-        }
-        return view(
-            'issue_token.index',
-            ['services' => $show_service, 'settings' => Setting::first()]
-        );
+        return redirect()->route('login');
     }
 
     public function createToken(Request $request, Service $service)
@@ -126,7 +129,7 @@ class TokenController extends Controller
             'User_Name' => 'admin@dev.com',
             'User_Password' => '123456789',
         );
-        $ch = curl_init('https://trakcaredevapi.kaauh.edu.sa/api/admin/login');
+        $ch = curl_init('https://trakcareapi.kaauh.edu.sa/api/admin/login');
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -158,10 +161,25 @@ class TokenController extends Controller
             $headers = [
                 'Authorization: Bearer '.$loginPatient
             ];
+            $mrn_length=strlen($mrn);
+            if($mrn_length<7)
+            {
+                $add_zero=7-$mrn_length;
+                $no_of_zeros = $add_zero;
+                $number = $mrn;
+                for($i=1;$i<=$no_of_zeros;$i++)
+                {
+                  $number = '0'.$number;
+                }
+                $new_mrn=$number;
+            }
+            else{
+                $new_mrn=$mrn;
+            }
             $data = array(
-                'MRN_Number' => $mrn,
+                'MRN_Number' => $new_mrn,
             );
-            $ch = curl_init('https://trakcaredevapi.kaauh.edu.sa/api/patient/validate');
+            $ch = curl_init('https://trakcareapi.kaauh.edu.sa/api/patient/validate');
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data);

@@ -11,7 +11,7 @@ class Call extends Model
     use HasFactory;
 
     protected $fillable = [
-        'queue_id','service_id','counter_id','user_id','token_letter','token_number','called_date','started_at','ended_at','waiting_time','served_time','turn_around_time','call_status_id','category','status','is_recall'
+        'queue_id','service_id','counter_id','user_id','token_letter','token_number','called_date','started_at','ended_at','waiting_time','served_time','turn_around_time','call_status_id','category','status','is_recall','no_of_call'
     ];
     protected $date=['called_date','started_at','ended_at'];
 
